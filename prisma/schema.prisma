@@ -19,14 +19,17 @@ model User {
   password  String @db.VarChar(50)
   name      String @db.VarChar(50)
   token     String? @db.VarChar(100)
+  contacts  Contact[]
   @@map("users")
 }
 
-// model Contact {
-//   id          String @id @default(cuid())
-//   first_name  String @db.VarChar(50)
-//   last_name   String? @db.VarChar(50)
-//   email       String? @db.VarChar(50)
-//   phone       String? @db.VarChar(20)
-//   userId      String @db.VarChar()
-// }
+model Contact {
+  id          String @id @default(cuid())
+  userId      String @db.VarChar(191)
+  first_name  String @db.VarChar(50)
+  last_name   String? @db.VarChar(50)
+  email       String? @db.VarChar(50)
+  phone       String? @db.VarChar(20)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@map("contacts")
+}
