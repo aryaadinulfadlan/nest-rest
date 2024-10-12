@@ -4,8 +4,6 @@ import * as request from 'supertest';
 import { AppModule } from '../src/app.module';
 import { Logger } from 'winston';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
-import { CommonModule } from 'src/common/common.module';
-import { UserModule } from 'src/user/user.module';
 import { TestService } from './test.service';
 import { TestModule } from './test.module';
 
@@ -25,9 +23,6 @@ describe('UserController', () => {
     testService = app.get(TestService);
   });
 
-  // it('/ GET', () => {
-  //   return request(app.getHttpServer()).get('/').expect(20).expect('Hell');
-  // });
   describe('POST /api/users', () => {
     beforeEach(async () => {
       await testService.deleteUser();
