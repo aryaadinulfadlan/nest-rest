@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { HttpException, Inject, Injectable } from '@nestjs/common';
 import { User } from '@prisma/client';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { PrismaService } from '../common/prisma.service';
@@ -33,6 +33,22 @@ export class ContactService {
       },
     });
     const { user_id, ...rest } = newContact;
+    return {
+      ...rest,
+    };
+  }
+
+  async get(user: User, contactId: string): Promise<ContactResponse> {
+    const contact = await this.prismaService.contact.findUnique({
+      where: {
+        user_id: user.id,
+        id: contactId,
+      },
+    });
+    if (!contact) {
+      throw new HttpException('Contact is not found', 404);
+    }
+    const { user_id, ...rest } = contact;
     return {
       ...rest,
     };
