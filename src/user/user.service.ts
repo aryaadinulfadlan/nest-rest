@@ -26,7 +26,7 @@ export class UserService {
     this.logger.info(`Register new user ${JSON.stringify(request)}`);
     const registerRequest: RegisterUserRequest =
       this.validationService.validate(UserValidation.REGISTER, request);
-    const isExists = await this.prismaService.user.findUnique({
+    const isExists = await this.prismaService.user.findFirst({
       where: {
         username: registerRequest.username,
       },
@@ -50,7 +50,7 @@ export class UserService {
       UserValidation.LOGIN,
       request,
     );
-    let user = await this.prismaService.user.findUnique({
+    let user = await this.prismaService.user.findFirst({
       where: {
         username: loginRequest.username,
       },
@@ -67,7 +67,7 @@ export class UserService {
     }
     user = await this.prismaService.user.update({
       where: {
-        username: loginRequest.username,
+        id: user.id,
       },
       data: {
         token: uuid(),
@@ -103,7 +103,7 @@ export class UserService {
     }
     const result = await this.prismaService.user.update({
       where: {
-        username: user.username,
+        id: user.id,
       },
       data: user,
     });
@@ -116,7 +116,7 @@ export class UserService {
   async logout(user: User): Promise<UserResponse> {
     const result = await this.prismaService.user.update({
       where: {
-        username: user.username,
+        id: user.id,
       },
       data: {
         token: null,

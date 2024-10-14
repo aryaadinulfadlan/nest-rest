@@ -11,6 +11,13 @@ export class TestService {
       where: { username: 'test' },
     });
   }
+  async deleteContact() {
+    await this.prismaService.contact.deleteMany({
+      where: {
+        email: 'test@mail.com',
+      },
+    });
+  }
   async createUser() {
     await this.prismaService.user.create({
       data: {
@@ -22,7 +29,7 @@ export class TestService {
     });
   }
   async getUser(): Promise<User> {
-    return await this.prismaService.user.findUnique({
+    return await this.prismaService.user.findFirst({
       where: {
         username: 'test',
       },
