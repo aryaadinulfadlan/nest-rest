@@ -9,4 +9,8 @@ export class AddressValidation {
     country: z.string().min(4).max(50),
     postal_code: z.string().min(4).max(10),
   });
+  static readonly GET: ZodType = z.object({
+    contact_id: z.string(),
+    address_id: z.string(),
+  });
 }

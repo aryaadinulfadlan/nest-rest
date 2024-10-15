@@ -171,7 +171,7 @@ describe('Contact Controller', () => {
       expect(response.body.data).toBe(true);
     });
   });
-  describe('GET /api/contacts', () => {
+  describe('SEARCH /api/contacts', () => {
     beforeEach(async () => {
       await testService.deleteContact();
       await testService.deleteUser();

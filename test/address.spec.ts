@@ -69,4 +69,49 @@ describe('Address Controller', () => {
       expect(response.body.data.postal_code).toBe('geo123');
     });
   });
+  describe('GET /api/contacts/:contactId/addresses/:addressId', () => {
+    beforeEach(async () => {
+      await testService.deleteAddress();
+      await testService.deleteContact();
+      await testService.deleteUser();
+      await testService.createUser();
+      await testService.createContact();
+      await testService.createAddress();
+    });
+    it('should be rejected if contact is not found', async () => {
+      const contact = await testService.getContact();
+      const address = await testService.getAddress();
+      const response = await request(app.getHttpServer())
+        .get(`/api/contacts/${contact.id}salah/addresses/${address.id}`)
+        .set('Authorization', 'token test');
+      logger.info(response.body);
+      expect(response.status).toBe(404);
+      expect(response.body.errors).toBeDefined();
+    });
+    it('should be rejected if address is not found', async () => {
+      const contact = await testService.getContact();
+      const address = await testService.getAddress();
+      const response = await request(app.getHttpServer())
+        .get(`/api/contacts/${contact.id}/addresses/${address.id}salah`)
+        .set('Authorization', 'token test');
+      logger.info(response.body);
+      expect(response.status).toBe(404);
+      expect(response.body.errors).toBeDefined();
+    });
+    it('should be able to get address', async () => {
+      const contact = await testService.getContact();
+      const address = await testService.getAddress();
+      const response = await request(app.getHttpServer())
+        .get(`/api/contacts/${contact.id}/addresses/${address.id}`)
+        .set('Authorization', 'token test');
+      logger.info(response.body);
+      expect(response.status).toBe(200);
+      expect(response.body.data.id).toBeDefined();
+      expect(response.body.data.street).toBe('jalan satu');
+      expect(response.body.data.city).toBe('margrave');
+      expect(response.body.data.province).toBe('georgia');
+      expect(response.body.data.country).toBe('georgia country');
+      expect(response.body.data.postal_code).toBe('geo123');
+    });
+  });
 });
