@@ -27,3 +27,7 @@ export class UpdateAddressRequest {
   country: string;
   postal_code: string;
 }
+export class RemoveAddressRequest {
+  contact_id: string;
+  address_id: string;
+}

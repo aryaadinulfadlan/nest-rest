@@ -197,4 +197,46 @@ describe('Address Controller', () => {
       expect(response.body.data.postal_code).toBe('updated123');
     });
   });
+  describe('DELETE /api/contacts/:contactId/addresses/:addressId', () => {
+    beforeEach(async () => {
+      await testService.deleteAddress();
+      await testService.deleteContact();
+      await testService.deleteUser();
+      await testService.createUser();
+      await testService.createContact();
+      await testService.createAddress();
+    });
+    it('should be rejected if contact is not found', async () => {
+      const contact = await testService.getContact();
+      const address = await testService.getAddress();
+      const response = await request(app.getHttpServer())
+        .delete(`/api/contacts/${contact.id}salah/addresses/${address.id}`)
+        .set('Authorization', 'token test');
+      logger.info(response.body);
+      expect(response.status).toBe(404);
+      expect(response.body.errors).toBeDefined();
+    });
+    it('should be rejected if address is not found', async () => {
+      const contact = await testService.getContact();
+      const address = await testService.getAddress();
+      const response = await request(app.getHttpServer())
+        .delete(`/api/contacts/${contact.id}/addresses/${address.id}salah`)
+        .set('Authorization', 'token test');
+      logger.info(response.body);
+      expect(response.status).toBe(404);
+      expect(response.body.errors).toBeDefined();
+    });
+    it('should be able to delete address', async () => {
+      const contact = await testService.getContact();
+      const address = await testService.getAddress();
+      const response = await request(app.getHttpServer())
+        .delete(`/api/contacts/${contact.id}/addresses/${address.id}`)
+        .set('Authorization', 'token test');
+      const deletedAddress = await testService.getAddress();
+      logger.info(response.body);
+      expect(response.status).toBe(200);
+      expect(response.body.data).toBe(true);
+      expect(deletedAddress).toBeNull();
+    });
+  });
 });
