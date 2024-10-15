@@ -239,4 +239,38 @@ describe('Address Controller', () => {
       expect(deletedAddress).toBeNull();
     });
   });
+  describe('LIST /api/contacts/:contactId/addresses', () => {
+    beforeEach(async () => {
+      await testService.deleteAddress();
+      await testService.deleteContact();
+      await testService.deleteUser();
+      await testService.createUser();
+      await testService.createContact();
+      await testService.createAddress();
+    });
+    it('should be rejected if contact is not found', async () => {
+      const contact = await testService.getContact();
+      const response = await request(app.getHttpServer())
+        .get(`/api/contacts/${contact.id}salah/addresses`)
+        .set('Authorization', 'token test');
+      logger.info(response.body);
+      expect(response.status).toBe(404);
+      expect(response.body.errors).toBeDefined();
+    });
+    it('should be able to get list of address', async () => {
+      const contact = await testService.getContact();
+      const response = await request(app.getHttpServer())
+        .get(`/api/contacts/${contact.id}/addresses`)
+        .set('Authorization', 'token test');
+      logger.info(response.body);
+      expect(response.status).toBe(200);
+      expect(response.body.data.length).toBe(1);
+      expect(response.body.data[0].id).toBeDefined();
+      expect(response.body.data[0].street).toBe('jalan satu');
+      expect(response.body.data[0].city).toBe('margrave');
+      expect(response.body.data[0].province).toBe('georgia');
+      expect(response.body.data[0].country).toBe('georgia country');
+      expect(response.body.data[0].postal_code).toBe('geo123');
+    });
+  });
 });

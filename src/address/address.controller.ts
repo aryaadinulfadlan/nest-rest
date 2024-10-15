@@ -84,4 +84,15 @@ export class AddressController {
       data: true,
     };
   }
+  @Get()
+  @HttpCode(200)
+  async list(
+    @Auth() user: User,
+    @Param('contactId') contactId: string,
+  ): Promise<WebResponse<AddressResponse[]>> {
+    const result = await this.addressService.list(user, contactId);
+    return {
+      data: result,
+    };
+  }
 }
