@@ -1,9 +1,13 @@
 import { HttpException, Inject, Injectable } from '@nestjs/common';
-import { User } from '@prisma/client';
+import { Contact, User } from '@prisma/client';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { PrismaService } from '../common/prisma.service';
 import { ValidationService } from '../common/validation.service';
-import { ContactResponse, CreateContactRequest } from 'src/model/contact.model';
+import {
+  ContactResponse,
+  CreateContactRequest,
+  UpdateContactRequest,
+} from 'src/model/contact.model';
 import { Logger } from 'winston';
 import { ContactValidation } from './contact.validation';
 
@@ -15,6 +19,27 @@ export class ContactService {
     private validationService: ValidationService,
   ) {}
 
+  async checkContactExists(
+    userId: string,
+    contactId: string,
+  ): Promise<Contact> {
+    const contact = await this.prismaService.contact.findUnique({
+      where: {
+        user_id: userId,
+        id: contactId,
+      },
+    });
+    if (!contact) {
+      throw new HttpException('Contact is not found', 404);
+    }
+    return contact;
+  }
+  toContactResponse(contact: Contact): ContactResponse {
+    const { user_id, ...rest } = contact;
+    return {
+      ...rest,
+    };
+  }
   async create(
     user: User,
     request: CreateContactRequest,
@@ -32,25 +57,28 @@ export class ContactService {
         user_id: user.id,
       },
     });
-    const { user_id, ...rest } = newContact;
-    return {
-      ...rest,
-    };
+    return this.toContactResponse(newContact);
   }
-
   async get(user: User, contactId: string): Promise<ContactResponse> {
-    const contact = await this.prismaService.contact.findUnique({
+    const contact = await this.checkContactExists(user.id, contactId);
+    return this.toContactResponse(contact);
+  }
+  async update(
+    user: User,
+    request: UpdateContactRequest,
+  ): Promise<ContactResponse> {
+    const updateRequest: UpdateContactRequest = this.validationService.validate(
+      ContactValidation.UPDATE,
+      request,
+    );
+    let contact = await this.checkContactExists(user.id, updateRequest.id);
+    contact = await this.prismaService.contact.update({
       where: {
-        user_id: user.id,
-        id: contactId,
+        id: contact.id,
+        user_id: contact.user_id,
       },
+      data: updateRequest,
     });
-    if (!contact) {
-      throw new HttpException('Contact is not found', 404);
-    }
-    const { user_id, ...rest } = contact;
-    return {
-      ...rest,
-    };
+    return this.toContactResponse(contact);
   }
 }

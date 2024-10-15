@@ -50,14 +50,14 @@ describe('Contact Controller', () => {
         .send({
           first_name: 'test',
           // last_name: '',
-          email: 'test@mail.com',
+          email: 'test@test.com',
           // phone: '',
         });
       logger.info(response.body);
       expect(response.status).toBe(200);
       expect(response.body.data.id).toBeDefined();
       expect(response.body.data.first_name).toBe('test');
-      expect(response.body.data.email).toBe('test@mail.com');
+      expect(response.body.data.email).toBe('test@test.com');
     });
   });
   describe('GET /api/contacts/:contactId', () => {
@@ -86,6 +86,63 @@ describe('Contact Controller', () => {
       expect(response.body.data.id).toBeDefined();
       expect(response.body.data.first_name).toBe('test');
       expect(response.body.data.email).toBe('test@test.com');
+    });
+  });
+  describe('PUT /api/contacts/:contactId', () => {
+    beforeEach(async () => {
+      await testService.deleteContact();
+      await testService.deleteUser();
+      await testService.createUser();
+      await testService.createContact();
+    });
+    it('should be rejected if validation is failed', async () => {
+      const contact = await testService.getContact();
+      const response = await request(app.getHttpServer())
+        .put(`/api/contacts/${contact.id}`)
+        .set('Authorization', 'token test')
+        .send({
+          first_name: '',
+          last_name: '',
+          email: '',
+          phone: '',
+        });
+      logger.info(response.body);
+      expect(response.status).toBe(400);
+      expect(response.body.errors).toBeDefined();
+    });
+    it('should be rejected if contactId is invalid (even validation success)', async () => {
+      const contact = await testService.getContact();
+      const response = await request(app.getHttpServer())
+        .put(`/api/contacts/${contact.id}jadi_salah`)
+        .set('Authorization', 'token test')
+        .send({
+          first_name: 'test',
+          last_name: 'testa',
+          email: 'test@test.com',
+          phone: '9090',
+        });
+      logger.info(response.body);
+      expect(response.status).toBe(404);
+      expect(response.body.errors).toBeDefined();
+    });
+    it('should be able to update contact', async () => {
+      const contact = await testService.getContact();
+      const response = await request(app.getHttpServer())
+        .put(`/api/contacts/${contact.id}`)
+        .set('Authorization', 'token test')
+        .send({
+          first_name: 'test updated',
+          last_name: 'testa updated',
+          email: 'update@update.com',
+          phone: '90update',
+        });
+      logger.info(response.body);
+      expect(response.status).toBe(200);
+      expect(response.body.data.id).toBeDefined();
+      expect(response.body.data.first_name).toBe('test updated');
+      expect(response.body.data.last_name).toBe('testa updated');
+      expect(response.body.data.email).toBe('update@update.com');
+      expect(response.body.data.phone).toBe('90update');
     });
   });
 });

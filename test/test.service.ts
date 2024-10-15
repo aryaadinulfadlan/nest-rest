@@ -29,11 +29,7 @@ export class TestService {
     });
   }
   async deleteContact() {
-    await this.prismaService.contact.deleteMany({
-      where: {
-        email: 'test@mail.com',
-      },
-    });
+    await this.prismaService.contact.deleteMany({});
   }
   async getContact(): Promise<Contact> {
     return await this.prismaService.contact.findFirst({
@@ -43,13 +39,14 @@ export class TestService {
     });
   }
   async createContact() {
+    const currentUser = await this.getUser();
     await this.prismaService.contact.create({
       data: {
         first_name: 'test',
         last_name: 'testa',
         email: 'test@test.com',
         phone: '9090',
-        user_id: (await this.getUser()).id,
+        user_id: currentUser.id,
       },
     });
   }
